@@ -17,6 +17,19 @@ among x1, ..., xk.
 
 You should compute (m1 + m2 + m3 + ... + m10000) mod 10000.
 
+import random
+h = MedianHeap()
+for i in range(300):
+    h.insert(random.randint(1, 200))
+    for a in h.small_half._queue:
+        if a > h.small_half._queue[0]:
+            print("Some thing wrong with small half")
+    for a in h.large_half._queue:
+        if a < h.small_half._queue[0]:
+            print("Something wrong with large half")
+    if h.small_half.length() < h.large_half.length():
+        print("The length is not correct")
+
 @author: ZIYE
 """
 
@@ -95,36 +108,22 @@ class Heap():
         self._queue.pop()
         pos = 0
         while pos < len(self._queue):
-            childpos1 = pos * 2 + 1
-            childpos2 = pos * 2 + 2
-            childpos = None
+            left = pos * 2 + 1
+            right = pos * 2 + 2
+            swap = pos
 
-            if childpos2 <= self.length() - 1:
-                if self._is_violated(childpos2, pos):
-                    if self._is_violated(childpos1, pos):
-                        if self._heap_type == "min":
-                            if self._queue[childpos1] < self._queue[childpos2]:
-                                childpos = childpos1
-                            else:
-                                childpos = childpos2
-                        if self._heap_type == "max":
-                            if self._queue[childpos1] < self._queue[childpos2]:
-                                childpos = childpos2
-                            else:
-                                childpos = childpos1
-                    else:
-                        childpos = childpos2
-                elif self._is_violated(childpos1, pos):
-                    childpos = childpos1
+            if left <= self.length() - 1:
+                if self._is_violated(left, pos):
+                    swap = left
 
-            elif childpos1 <= self.length() - 1:
-                if self._is_violated(childpos1, pos):
-                    childpos = childpos1
+            if right <= self.length() - 1:
+                if self._is_violated(right, swap):
+                    swap = right
 
-            if childpos:
-                self._queue[pos], self._queue[childpos] = \
-                    self._queue[childpos], self._queue[pos]
-                pos = childpos
+            if swap != pos:
+                self._queue[pos], self._queue[swap] = \
+                    self._queue[swap], self._queue[pos]
+                pos = swap
             else:
                 break
 
@@ -133,29 +132,10 @@ class Heap():
 
 if __name__ == "__main__":
     h = MedianHeap()
-    # import random
-    # for i in range(300):
-    #     h.insert(random.randint(1, 200))
-    #     for a in h.small_half._queue:
-    #         if a > h.small_half._queue[0]:
-    #             print("Wrong1")
-    #     for a in h.large_half._queue:
-    #         if a < h.small_half._queue[0]:
-    #             print("Wrong2")
-    #     if h.small_half.length() < h.large_half.length():
-    #         print("Wrong3")
-
     f = open("Median.txt")
     array = [int(line) for line in f]
     medium_sum = 0
     for a in array:
         h.insert(a)
         medium_sum += h.median()
-        # for a in h.small_half._queue:
-        #     if a > h.small_half._queue[0]:
-        #         print("Wrong")
-        # for a in h.large_half._queue:
-        #     if a < h.small_half._queue[0]:
-        #         print("Wrong")
     print(medium_sum % 10000)
-    print(medium_sum)
