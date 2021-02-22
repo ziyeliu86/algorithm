@@ -19,9 +19,9 @@ Your task is to run Prim's minimum spanning tree algorithm on this graph. You
 should report the overall cost of a minimum spanning tree --- an integer, which
 may or may not be negative.
 
-IMPLEMENTATION NOTES: This graph is small enough that the straightforward O(mn)
-time implementation of Prim's algorithm should work fine. OPTIONAL: For those
-of you seeking an additional challenge, try implementing a heap-based version.
+This graph is small enough that the straightforward O(mn) time implementation
+of Prim's algorithm should work fine.
+TO DO: Implementing a heap-based version.
 The simpler approach, which should already give you a healthy speed-up, is to
 maintain relevant edges in a heap (with keys = edge costs).  The superior
 approach stores the unprocessed vertices in the heap, as described in lecture.
@@ -35,7 +35,8 @@ import random
 def prim_minimum_span(n, m, edges):
     # some initialization
     random_vertice = random.randint(1, n+1)
-    X = [random_vertice]
+    X = [random_vertice]    # spanned by tree T
+    T = []                  # tree
     cost = 0
 
     # an edge dictionary to easy find edges associated with a vertice
@@ -44,23 +45,23 @@ def prim_minimum_span(n, m, edges):
         edge_dict[e[0]].append((e[0], e[1], e[2]))
         edge_dict[e[1]].append((e[1], e[0], e[2]))
 
-    # initialize a list for shortest edge between X and V-X
+    # A dictionary of vertices which have edges associated with the front of X
+    # q_dict[v] = (cost, u) where v in V-X, and u in X
     inf_cost = max([e[2] for e in edges]) + 1
-    q = [(inf_cost, i) for i in range(1, n + 1) if i != random_vertice]
+    q_dict = {i: (inf_cost, 0) for i in range(1, n + 1) if i != random_vertice}
 
     for e in edge_dict[random_vertice]:
-        q.remove((inf_cost, e[1]))
-        q.append((e[2], e[1]))
-
-    q_dict = {item[1]: item[0] for item in q}
+        q_dict[e[1]] = (e[2], e[0])
 
     while len(X) != n:
-        # Get the cheapest edge
-        c, v = min(q)
-        q.remove((c, v))
+        # Get the node in V-X with the least distance to X
+        v = min(q_dict, key=q_dict.get)
+        c, u = q_dict[v]
         q_dict.pop(v)
         cost += c
+
         X.append(v)
+        T.append((u, v))
 
         # find all v-> w
         vw = edge_dict[v]   # all the edges associated with v
@@ -68,10 +69,9 @@ def prim_minimum_span(n, m, edges):
             w = e[1]
             if w not in X:
                 # find key[w]
-                q.remove((q_dict[w], w))
-                q_dict[w] = min(q_dict[w], e[2])
-                q.append((q_dict[w], w))
-    return cost
+                if e[2] < q_dict[w][0]:
+                    q_dict[w] = (e[2], v)
+    return T, cost
 
 
 if __name__ == "__main__":
@@ -79,5 +79,5 @@ if __name__ == "__main__":
     lines = f.readlines()
     n, m = (int(s) for s in lines[0].split())
     edges = [[int(s) for s in line.split()] for line in lines[1:]]
-    cost = prim_minimum_span(n, m, edges)
+    _, cost = prim_minimum_span(n, m, edges)
     print(cost)
