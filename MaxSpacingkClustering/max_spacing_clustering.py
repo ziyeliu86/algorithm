@@ -96,14 +96,14 @@ def clustering(edges, n, k):
 
     clusters = UnionFind(n)
     i = 0
-    cost = 0
-    while clusters.cluster_num() >= k:
+    while True:
         [n1, n2, cost] = edges[i]
         if clusters.find(n1) != clusters.find(n2):
+            if clusters.cluster_num() == k:
+                break
             clusters.union(n1, n2)
-            max_spacing = cost
         i += 1
-    return max_spacing
+    return cost
 
 
 def node_mapping(nodes):
@@ -138,26 +138,6 @@ def generate_bit_mask(n_bits):
     return mask
 
 
-# def neighbor(i, nodes, unexplored_nodes):
-#     node = nodes[i]
-#     c1f24 = []
-#     for j in range(n_bits):
-#         c1f24.append(node.copy())
-#         c1f24[-1][j] = 1 if c1f24[-1][j] == 0 else 0
-#     c2f24 = []
-#     for j in range(n_bits-1):
-#         for k in range(j, n_bits):
-#             c2f24.append(node.copy())
-#             c2f24[-1][j] = 1 if c2f24[-1][j] == 0 else 0
-#             c2f24[-1][k] = 1 if c2f24[-1][k] == 0 else 0
-#     neighbors = [node] + c1f24 + c2f24
-#     neighbor_nodes = []
-#     for j in unexplored_nodes:
-#         if nodes[j] in neighbors:
-#             neighbor_nodes.append(j)
-#     return neighbor_nodes
-
-
 def clustering_big(nodes):
     n = len(nodes)
     n_bits = len(nodes[0])
@@ -186,7 +166,6 @@ if __name__ == "__main__":
 
     f = open("clustering_big.txt", "r")
     lines = f.readlines()
-    # n, n_bits = (int(s) for s in lines[0].split())
     nodes = [[int(s) for s in line.split()] for line in lines[1:]]
     cluster_num = clustering_big(nodes)
     print(cluster_num)
