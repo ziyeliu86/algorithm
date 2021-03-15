@@ -38,38 +38,34 @@ def tsp_dp(distances):
     # C(S, k) is the minimum distance, starting at city 0, visiting all cities
     # in S and finishing at city k
     for k in range(1, n):
-        C[(tuple([k]), k)] = distances[k, 0]
+        C[(1 << k, k)] = distances[k, 0]
     for s in range(2, n):
-        subset = combinations(list(range(1, n)), s)
-        for S in subset:
+        C2 = {}
+        print(f"Processing {s-1}/{n-1}")
+        for S in combinations(list(range(1, n)), s):
+            bits = 0
+            for bit in S:
+                bits |= 1 << bit
             for k in S:
+                prev = bits & ~(1 << k)
                 cskm = []
                 for m in S:
-                    if m != k:
-                        sm = list(S).copy()
-                        sm.remove(k)
-                        sm = tuple(sm)
-                        cskm.append(C[(sm, m)] + distances[k, m])
-                        print(f"\nsm={sm}, k={k}, m={m}, C[(sm, m)]={C[(sm, m)]}, distances[k, m]={distances[k, m]}")
-                C[tuple(S), k] = min(cskm)
-                print(f"S={S}, k={k}, dist={min(cskm)}")
-    print(C)
+                    if m == k:
+                        continue
+                    cskm.append(C[(prev, m)] + distances[k, m])
+                C2[bits, k] = min(cskm)
+                # print(C2)
+        C = C2
+    # print(C)
+    bits = (2 ** n - 1) - 1
     fullpath = tuple(range(1, n))
-    dists = [C[(fullpath, k)] + distances[0, k] for k in fullpath]
+    dists = [C[(bits, k)] + distances[0, k] for k in fullpath]
     return min(dists)
 
 
 if __name__ == "__main__":
-    # coord = np.loadtxt("tsp.txt", skiprows=1)
-    # coord_diff = coord[np.newaxis, :, :] - coord[:, np.newaxis, :]
-    # distances = np.sqrt((coord_diff ** 2).sum(axis=-1))
-    # mindist = tsp_dp(distances)
-    # print(mindist)
-
-    distances = np.array([
-        [0, 2, 9, 10],
-        [1, 0, 6, 4],
-        [15, 7, 0, 8],
-        [6, 3, 12, 0]])
+    coord = np.loadtxt("tsp.txt", skiprows=1)
+    coord_diff = coord[np.newaxis, :, :] - coord[:, np.newaxis, :]
+    distances = np.sqrt((coord_diff ** 2).sum(axis=-1))
     mindist = tsp_dp(distances)
     print(mindist)
