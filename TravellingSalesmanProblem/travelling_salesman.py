@@ -15,22 +15,30 @@ from itertools import combinations
 
 def tsp_dp(distances):
     """
-    This function is an implemnation of Bellman–Held–Karp algorithm.
+    This function is an implemnation of Held–Karp algorithm.
     https://en.wikipedia.org/wiki/Held%E2%80%93Karp_algorithm
 
+    Args:
+        distances(N by N numpy array): distances[m, n] is the distance from
+        vertice n to m
+    Returns:
+        the minium distance to travel all the vertices exactly once
     Examples:
-    distances = np.array(
-        [0, 2, 9, 10],
-        [1, 0, 6, 4],
-        [15, 7, 0, 8],
-        [6, 3, 12, 0])
-    mindist = tsp_dp(distances)
-    print(mindist)
+    >>> distances = np.array([
+    >>>    [0, 2, 9, 10],
+    >>>    [1, 0, 6, 4],
+    >>>    [15, 7, 0, 8],
+    >>>    [6, 3, 12, 0]])
+    >>> mindist = tsp_dp(distances)
+    >>> print(mindist)
+    21
     """
     C = {}
     n, _ = distances.shape
+    # C(S, k) is the minimum distance, starting at city 0, visiting all cities
+    # in S and finishing at city k
     for k in range(1, n):
-        C[(tuple([k]), k)] = distances[0, k]
+        C[(tuple([k]), k)] = distances[k, 0]
     for s in range(2, n):
         subset = combinations(list(range(1, n)), s)
         for S in subset:
@@ -39,13 +47,15 @@ def tsp_dp(distances):
                 for m in S:
                     if m != k:
                         sm = list(S).copy()
-                        sm.remove(m)
+                        sm.remove(k)
                         sm = tuple(sm)
-                        cskm.append(C[(sm, k)] + distances[m, k])
+                        cskm.append(C[(sm, m)] + distances[k, m])
+                        print(f"\nsm={sm}, k={k}, m={m}, C[(sm, m)]={C[(sm, m)]}, distances[k, m]={distances[k, m]}")
                 C[tuple(S), k] = min(cskm)
+                print(f"S={S}, k={k}, dist={min(cskm)}")
     print(C)
     fullpath = tuple(range(1, n))
-    dists = [C[(fullpath, k)] + distances[k, 0] for k in fullpath]
+    dists = [C[(fullpath, k)] + distances[0, k] for k in fullpath]
     return min(dists)
 
 
