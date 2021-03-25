@@ -81,23 +81,19 @@ def solve_2sat_scc(n, clauses):
     for c in clauses:
         gt[get_node_label(c[0], n)].append(get_node_label(-c[1], n))
         gt[get_node_label(c[1], n)].append(get_node_label(-c[0], n))
-    # print(gt)
 
     print("Run DFS-Loop on gt")
     ft, _ = dfs_loop(gt, n * 2)
-    # print(ft)
 
     print("Get the re-labeled graph")
     for c in clauses:
         g[ft[get_node_label(-c[0], n)-1]].append(ft[get_node_label(c[1], n)-1])
         g[ft[get_node_label(-c[1], n)-1]].append(ft[get_node_label(c[0], n)-1])
-    # print(g)
 
     print("Run DFS-loop on g")
     _, ln = dfs_loop(g, n * 2)
-    # print(ln)
+    # Get the lead node of the original node labels
     lno = [ln[ft[i]-1] for i in range(2*n)]
-    # print(lno)
 
     print("Check if instance satisfiable")
     for i in range(n):
